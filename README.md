@@ -86,7 +86,49 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 ### Bulkhead
 <details>
 <summary>더보기</summary>
-<div markdown="1">
-
+<div markdown="1">  
+  
+  * 동시 실행(concurrent execution) 수를 제한할 수 있는 bulkhead pattern의 2가지 구현체를 제공  
+       * SemaphoreBulkhead  
+          - Semaphores 기반  
+          - 다양한 Threading과 I/O model에서 잘 작동함  
+          - "shadow" thread pool 옵션을 제공하지 않음  
+          - correct thread pool size를 보장하는 것은 client의 책임 
+            
+       * FixedThreadPoolBulkhead 
+          - bounded queue와 fixed thread pool 사용
+  
+  * BulkheadRegistry
+      * in memory BulkheadRegistry 와 ThreadPoolBulkheadRegistry 제공
+      * ThreadPoolBulkheadRegistry은 Bulkhead instance를 관리(create and retrieve)하는데 사용할 수 있음
+ 
+  * BulkheadConfig
+      * BulkheadConfig builder를 사용하여 custom한 global configration을 할 수 있음
+      * | property | default | description |  
+        |----------|---------------|-------------------|
+        | maxConcurrentCalls | 25 | bulkhead에 의해 허용되는 최대 병렬 실행(parallel executions)량 |
+        | maxWaitDuration | 0 | bulkhead가 가득찼을 때, 진입하고자 하는 Thread를 차단해야하는 최대 시간 |
+        
+  * ThreadPoolBulkheadConfig
+      * ThreadPoolBulkheadConfig builder를 사용하여 custom한 global configration을 할 수 있음
+      * | property | default | description |  
+        |----------|---------------|-------------------|
+        | maxThreadPoolSize | Runtime.getRuntime().availableProcessors() | Max thread pool size |
+        | coreThreadPoolSize | Runtime.getRuntime().availableProcessors() - 1 | Core thread pool size | 
+        | queueCapacity | 100 | Capacity of the queue |
+        | keepAliveDuration | 20 | Thread가 Core수 보다 많을 때, idle thread가 종료되기 전 새 task를 기다리는 최대 시간[ms] |
+                    
 </div>
 </details>
+
+### RateLimiter
+
+<details>
+<summary>더보기</summary>
+<div markdown="1">
+ 
+ 
+</div>
+</details>
+       
+   

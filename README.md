@@ -127,6 +127,10 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 <summary>더보기</summary>
 <div markdown="1">
  
+  * 서비스의 고가용성 및 안정성을 수립하고 확장 가능한 API를 준비하기 위한 필수 기술
+  * 초과 요청에 대해서 거절하거나 나중에 실행하기 위한 Queue 생성, 또는 앞의 두가지 방식을 결합하여 사용 가능
+  * 
+
  
 </div>
 </details>

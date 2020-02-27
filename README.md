@@ -56,5 +56,23 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
      * sliding window size = 15 라 해서, 15개의 호출만 동시 실행되는 것은 아님  
      * concurrent threads 수를 제한하고자할 시, Bulkhead 사용
      
+ * CircuitBreakerRegistry  
+     * Thread safe와 atomicity guarantee를 제공하는 ConcurrentHashMap의 기반 in memory CircuitBreakerRegistry가 제공 됨  
+     * CircuitBreaker instance를 관리함(create and retrieve)
      
+ * CircuitBreakerConfig  
+     * CircuitBreakerConfig builder를 사용하여 custom한 global configration을 할 수 있음
+     * | property | default | description |  
+       |----------|---------------|-------------------|
+       | failureRateThreshold | 50 | 실패율 임계치(%) |
+       | slowCallRateThreshold | 100 | 느린 호출률 (%) <br> 100보다 크면 circuit open |
+       | slowCallDurationThreshold | 60000 | 느린 호출로 판단하는 초 [ms] <br> slowCallRate를 증가 시킴 |
+       | permittedNumberOfCallsInHalfOpenState | 10 | HalfOpenState 상태에서 허용되는 호출 수 |
+       | slidingWindowType | COUNT_BASED | sliding window type <br> COUNT_BASED or TIME_BASED |
+       | slidingWindowSize | 100 | 에러율을 계산하기 위한 최소 호출 수 | 
+       | waitDurationInOpenState | 60000 | OPEN 에서 HALF OPEN으로 가기 전 CircuitBreaker의 대기 시간 |
+       | automaticTransitionFromOpenToHalfOpenEnabled | false | true일 경우, waitDurationInOpenState 시간 이후 자동으로 OPEN에서 HALF OPEN으로 transition 됨 |
+       | recordExceptions | empty | 실패로 기록할 Exception list |
+       | ignoreExceptions | empty | 실패/성공으로 기록하지 않을 Exception list <br> recordExceptions에 있는 Exception일지라도 기록하지 않음 |
+       
      

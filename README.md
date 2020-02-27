@@ -13,6 +13,10 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 ## Core Modules
 
 ### CircuitBreaker
+<details>
+<summary>더보기</summary>
+<div markdown="1">
+ 
   * 3가지의 정상 상태(CLOSED, OPEN, HALF_OPEN)와 특수 상태(DISABLED, FORCED_OPEN)로 구성된 유한 상태 머신(finite state machine)로 구현 됨  
   * sliding window를 사용하여 호출 결과를 집계 및 저장
   * count-based 과 time-based, 두 종류의 sliding window가 존재 <br><br>
@@ -74,5 +78,15 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
        | automaticTransitionFromOpenToHalfOpenEnabled | false | true일 경우, waitDurationInOpenState 시간 이후 자동으로 OPEN에서 HALF OPEN으로 transition 됨 |
        | recordExceptions | empty | 실패로 기록할 Exception list |
        | ignoreExceptions | empty | 실패/성공으로 기록하지 않을 Exception list <br> recordExceptions에 있는 Exception일지라도 기록하지 않음 |
-       
-     
+
+
+</div>
+</details> 
+
+### Bulkhead
+<details>
+<summary>더보기</summary>
+<div markdown="1">
+
+</div>
+</details>

@@ -145,7 +145,7 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
       * Semaphores 사용
     
   * RateLimiterRegistry
-      * RateLimiterRegistry RateLimite instance를 관리(create and retrieve)하는데 사용할 수 있음
+      * in memory RateLimiterRegistry는 RateLimite instance를 관리(create and retrieve)하는데 사용할 수 있음
       
   * RateLimiterConfig 
       * RateLimiterConfig builder를 사용하여 custom한 global configration을 할 수 있음
@@ -167,8 +167,43 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 <details>  
 <summary>더보기</summary>      
 <div markdown="1">        
+ 
+   * RetryRegistry
+      * in memory RetryRegistry는 Retry instance를 관리(create and retrieve)하는데 사용할 수 있음
 
+   * RetryConfig
+      * RetryConfig builder를 사용하여 custom한 global configration을 할 수 있음
+      * | property | default | description |  
+        |----------|---------------|-------------------| 
+        | maxAttempts | 3 | 최대 Retry 횟수 |
+        | waitDuration | 500 | Retry 사이의 fixed 대기 시간[ms] |
+        | intervalFunction | numOfAttempts -> waitDuration | Retry 실패 후, 대기 interval을 수정하는 function <br> 기본적으로, wait duration은 일정하게 유지 |
+        | retryOnResultPredicate | result -> false | result를 Retry 해야하는지 판단하는 predicate <br> true : 재시도 |
+        | retryOnExceptionPredicate | throwable -> true | Exception을 Retry 해야하는지 판단하는 predicate <br> true : 재시도 |
+        | retryExceptions | empty | 실패로 기록되고, Retry 할 Exception list | 
+        | ignoreExceptions | empty | ignore하고 Retry 하지 않는 Exception list |
+          
+   * IntervalFunction
+      * Retry 사이에 fixed 대기 시간을 사용하지 않고, 모든 Retry에 대한 대기 시간을 계산하는데 IntervalFunction을 사용
+      * IntervalFunction 생성을 간단하게 할 수 있는 factory method를 제공
+         ~~~ java
+         IntervalFunction defaultWaitInterval = IntervalFunction.ofDefaults();
 
+         // This interval function is used internally when you only configure waitDuration  
+         IntervalFunction fixedWaitInterval = IntervalFunction.of(Duration.ofSeconds(5));
+
+         IntervalFunction intervalWithExponentialBackoff = IntervalFunction.ofExponentialBackoff();
+
+         IntervalFunction intervalWithCustomExponentialBackoff 
+                              = IntervalFunction.ofExponentialBackoff(IntervalFunction.DEFAULT_INITIAL_INTERVAL, 2d);
+
+         IntervalFunction randomWaitInterval = IntervalFunction.ofRandomized();
+
+         // Overwrite the default intervalFunction with your custom one
+         RetryConfig retryConfig = RetryConfig.custom()
+                                              .intervalFunction(intervalWithExponentialBackoff)
+                                              .build();
+         ~~~
 
 </div>
 </details>

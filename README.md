@@ -207,3 +207,41 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 
 </div>
 </details>
+
+### TimeLimiter
+
+<details>  
+<summary>더보기</summary>      
+<div markdown="1"> 
+ 
+   * TimeLimiterRegistry
+       * in memory TimeLimiterRegistry는 TimeLimiter instance를 관리(create and retrieve)하는데 사용할 수 있음
+ 
+   * TimeLimiterConfig
+       * TimeLimiterConfig builder를 사용하여 custom한 global configration을 할 수 있음
+       * | property | default | description |  
+         |----------|---------------|-------------------| 
+         | timeoutDuration | 1 | timeout 기간[s] |
+         | cancelRunningFuture | true | running future에 취소해야하는지 여부 |
+       
+   * 실행 시간을 제한하기 위해 CompletionStage 와 Future를 decorate하는 decorator function을 제공
+   ~~~ java
+   // Given I have a helloWorldServic.sayHelloWorld() method which takes too long
+   HelloWorldService helloWorldService = mock(HelloWorldService.class);
+
+   // Create a TimeLimiter
+   TimeLimiter timeLimiter = TimeLimiter.of(Duration.ofSeconds(1));
+   // The Scheduler is needed to schedule a timeout on a non-blocking CompletableFuture
+   ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
+
+   // The non-blocking variant with a CompletableFuture
+   CompletableFuture<String> result = timeLimiter.executeCompletionStage(scheduler, 
+                                                  () -> CompletableFuture.supplyAsync(helloWorldService::sayHelloWorld))
+                                                 .toCompletableFuture();
+
+   // The blocking variant which is basically future.get(timeoutDuration, MILLISECONDS)
+   String result = timeLimiter.executeFutureSupplier(() -> CompletableFuture.supplyAsync(() -> helloWorldService::sayHelloWorld));
+   ~~~
+       
+</div>
+</details>

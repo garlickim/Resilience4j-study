@@ -121,18 +121,54 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 </div>
 </details>
 
-### RateLimiter
+### RateLimiter  
+<details>  
+<summary>더보기</summary>      
+<div markdown="1">  
+  
+  * 서비스의 고가용성 및 안정성을 수립하고 확장 가능한 API를 준비하기 위한 필수 기술  
+  
+  * 초과 요청에 대해서 거절하거나 나중에 실행하기 위한 Queue 생성, 또는 앞의 두가지 방식을 결합하여 사용 가능  
+  
+  * RateLimiter의 구현체
+      * AtomicRateLimiter (AtomicReference 통해 state를 관리, Default)
+      * SemaphoreBasedRateLimiter <br><br>
+      * limitRefreshPeriod 후에 permissions refresh 하는 스케쥴러 포함
+      * AtomicRateLimiter 구현체의 경우 RateLimiter가 사용되지 않는 경우 refresh를 skip 할 수 있도록 최적화 되어 있음
+  
+  * AtomicRateLimiter.State는 완전히 변경할 수 없음  
+      * activeCycle - 마지막 호출에서 사용된 Cycle number  
+      * activePermissions - 마지막 호출 후 사용 가능한 permission 수 (Can be negative if some permissions were reserved)  
+      * nanosToWait - 마지막 호출에 대한 permission을 기다리는 nanoseconds 수
+      
+  * SemaphoreBasedRateLimiter
+      * Semaphores 사용
+    
+  * RateLimiterRegistry
+      * RateLimiterRegistry RateLimite instance를 관리(create and retrieve)하는데 사용할 수 있음
+      
+  * RateLimiterConfig 
+      * RateLimiterConfig builder를 사용하여 custom한 global configration을 할 수 있음
+      * | property | default | description |  
+        |----------|---------------|-------------------| 
+        | timeoutDuration | 5 | thread가 permission을 기다리는 대기 시간[s] |
+        | limitRefreshPeriod | 500 | limit refresh 기간이 지나면 rate limiter는 permission count를 limitForPeriod 값으로 재설정[ns] |
+        | limitForPeriod | 50 | 한번의 limit refresh 기간 동안 사용 가능 한 permission 수 |
+        
+  * Runtime 시점에 rate limiter params을 변경하기 위해, changeTimeoutDuration와 changeLimitForPeriod를 사용 가능함
+      * 현재 대기하고 있는 Thread 또는 현재 period permissions에 영향을 미치지 않음
+      
 
-<details>
-<summary>더보기</summary>
-<div markdown="1">
- 
-  * 서비스의 고가용성 및 안정성을 수립하고 확장 가능한 API를 준비하기 위한 필수 기술
-  * 초과 요청에 대해서 거절하거나 나중에 실행하기 위한 Queue 생성, 또는 앞의 두가지 방식을 결합하여 사용 가능
-  * 
-
- 
 </div>
 </details>
-       
-   
+
+### Retry
+
+<details>  
+<summary>더보기</summary>      
+<div markdown="1">        
+
+
+
+</div>
+</details>

@@ -380,7 +380,10 @@ private <T> Mono<T> executeWithFallback(Mono<T> publisher, Function<Throwable, M
 #### 고민해 볼 사항
 
 * 공통적으로 처리한다면 어떤 방식이 더 효율적인가?  
---> 
+--> 개인적으로, Annotation 방식이 더 효율적일 것 같다.  
+    config 관련 설정은 모두 yml 파일에 선언 후,   
+    실제 코드에서 annotation으로 decorate 하는것이 가독성/관리적인 측면에서 더 낫다고 판단한다.  
+
 
 * RateLimit 적용시, 특정 Request에 대해서는 accept 할 수 있을까?  
 -->

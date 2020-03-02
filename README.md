@@ -255,3 +255,138 @@ Netflix Hystrix가 maintenance로 바뀌면서, Resilience4j를 사용하도록 
 
 </div>
 </details>
+
+
+
+
+<br><br><br>
+
+## 적용 방안
+
+<details>  
+<summary>더보기</summary>      
+<div markdown="1"> 
+ 
+1. Annotation base
+~~~yml
+resilience4j.circuitbreaker:
+  instances:
+    backendB:
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 10
+      permittedNumberOfCallsInHalfOpenState: 3
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 90
+
+resilience4j.retry:
+  instances:
+    backendB:
+      maxRetryAttempts: 2
+      waitDuration: 100
+      retryExceptions: org.springframework.web.client.HttpServerErrorException
+
+resilience4j.ratelimiter:
+  instances:
+    backendB:
+      limitForPeriod: 10
+      limitRefreshPeriod: 1s
+      timeoutDuration: 0
+~~~
+
+~~~java
+@CircuitBreaker(name = "backendB", fallbackMethod = "fallbackB1")
+@Retry(name = "backendB", fallbackMethod = "fallbackB2")
+@RateLimiter(name = "backendB", fallbackMethod = "fallbackB3")
+public void callMethod() {
+    // write code here..
+}
+~~~
+
+* 각각의 Annotation에 fallbackMethod 지정 가능
+* CircuitBreaker의 fallbackMethod 오류(HttpServerErrorException) 발생 시, Retry 시도
+* Throttling을 위한 RateLimeter
+
+<br><br>
+
+2. Code base
+~~~yml
+resilience4j.circuitbreaker:
+  instances:
+    backendB:
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 10
+      permittedNumberOfCallsInHalfOpenState: 3
+      waitDurationInOpenState: 5s
+      failureRateThreshold: 90
+
+resilience4j.retry:
+  instances:
+    backendB:
+      maxRetryAttempts: 2
+      waitDuration: 100
+      retryExceptions: org.springframework.web.client.HttpServerErrorException
+
+resilience4j.ratelimiter:
+  instances:
+    backendB:
+      limitForPeriod: 10
+      limitRefreshPeriod: 1s
+      timeoutDuration: 0
+~~~
+
+~~~java
+private static final String BACKEND_B = "backendB";
+private final CustomService customService;
+private final CircuitBreaker circuitBreaker;
+private final Retry retry;
+private final RateLimiter rateLimiter;
+private final TimeLimiter timeLimiter;
+public CustomController(CustomService customService,
+                         CircuitBreakerRegistry circuitBreakerRegistry,
+                         RetryRegistry retryRegistry,
+                         RateLimiterRegistry rateLimiterRegistry,
+                         TimeLimiterRegistry timeLimiterRegistry) {
+    this.customService = customService;
+    this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(BACKEND_B);
+    this.retry = retryRegistry.retry(BACKEND_B);
+    this.rateLimiter = rateLimiterRegistry.rateLimiter(BACKEND_B);
+    this.timeLimiter = timeLimiterRegistry.timeLimiter(BACKEND_B);
+}
+@PostMapping("test")
+public Mono<String> monoTest(){
+    return executeWithFallback(customService.callMethod(), this::monoFallback);
+}
+public Mono<String> monoFallback(Throwable ex){
+    return Mono.just("inside fallback");
+}
+private <T> Mono<T> executeWithFallback(Mono<T> publisher, Function<Throwable, Mono<T>> fallback){
+    return publisher
+            .transform(TimeLimiterOperator.of(timeLimiter))
+            .transform(CircuitBreakerOperator.of(circuitBreaker))
+            .transform(RetryOperator.of(retry))
+            .transform(RateLimiterOperator.of(rateLimiter))
+            .onErrorResume(TimeoutException.class, fallback)
+            .onErrorResume(CallNotPermittedException.class, fallback)
+            .onErrorResume(RequestNotPermitted.class, fallback);
+}
+~~~
+
+<br>
+
+* fallback 메소드 작성시, origin method와 동일한 Return type을 가져야 하며 Exception parameter를 인자로 받아야 함
+
+<br>
+
+#### 고민해 볼 사항
+
+* 공통적으로 처리한다면 어떤 방식이 더 효율적인가?  
+--> 
+
+* RateLimit 적용시, 특정 Request에 대해서는 accept 할 수 있을까?  
+-->
+
+* Api 별 config를 다르게..?  
+--> 
+
+</div>
+</details>
